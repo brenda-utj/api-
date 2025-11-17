@@ -1,0 +1,1004 @@
+{
+	"info": {
+		"_postman_id": "98b45114-b90e-43a9-bc5d-f588c181334c",
+		"name": "pos",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "sign Up",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Luis\",\n\t\"lastname\": \"enc zona\",\n\t\"email\": \"luisenczona@mail.com\",\n\t\"username\": \"luisenczona\",\n\t\"password\": \"zona\",\n\t\"role\": \"encargado de zona\",\n\t\"zona\": \"5d8d83ccd7724c00177f9598\",\n\t\"sucursal\": \"\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/users/signup",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"luisgerente\",\n\t\"password\": \"gerente\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/users/login",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nueva zona",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Zapopan\",\n\t\"location\": [] \n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/locations/zona/new",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"locations",
+						"zona",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nueva sucursal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Sucursal Basilica\",\n\t\"zona\": \"5da7b9089d930bc01d0edbf0\",\n\t\"address\": {\n\t\t\"street\": \"Av Hidalgo\",\n\t\t\"no\": 100,\n\t\t\"colony\": \"Zapopan Centro\",\n\t\t\"cp\": 45000\n\t},\n\t\"location\": [] \n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/locations/sucursal/new",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"locations",
+						"sucursal",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get sucursales",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/api/locations/sucursales/all/{{zonaId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"locations",
+						"sucursales",
+						"all",
+						"{{zonaId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nueva materia prima",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"Papas\",\n\t\"description\": \"papas en costal\",\n\t\"trademark\": \"Fruteria bernal\",\n\t\"area\": \"cocina\",\n\t\"unidad\": \"pieza\",\n\t\"type\": \"\",\n\t\"cost\": 200,\n\t\"category\": \"insumos de cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/products/materia/new",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"materia",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "nuevo producto",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"Papas asadas\",\n\t\"description\": \"pollo rostizado entero\",\n\t\"materias\": [{\"id\": \"5da7b9d79d930bc01d0edbf2\", \"cantidad\": 1, \"unidad\": \"pieza\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 20,\n\t\"unidad\": \"pieza\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/products/product/new",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"product",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get materias",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/products/materia/all",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"materia",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get products",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/products/product/all",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"product",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add materials to sucursal inventory",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerenteToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/addMateria/{{idInventory}}/1",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"addMateria",
+						"{{idInventory}}",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add production",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerenteToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/production/{{idProductInventory}}/1",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"production",
+						"{{idProductInventory}}",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get inventarios",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/sucursal",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"sucursal"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update cost",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWN1cnNhbGVzIjpbXSwiX2lkIjoiNWQ4ZDczOTIyYTA4ZTAwMDE3YjdlN2M5IiwibmFtZSI6Ikx1aXMiLCJsYXN0bmFtZSI6ImdlcmVudGUiLCJlbWFpbCI6Imx1aXNnZXJlbnRlQG1haWwuY29tIiwidXNlcm5hbWUiOiJsdWlzZ2VyZW50ZSIsInBhc3N3b3JkIjoiJDJhJDEwJEEybXpqbjBZN3o1L2xZZFI3dFptcE9VdzB5WUNkcWE4Mm9CS3BNL1NiMjVjbXNGM1JmeWw2Iiwicm9sZSI6ImdlcmVudGUiLCJzdWN1cnNhbCI6IjVkOGQ4NWE0ZDc3MjRjMDAxNzdmOTU5OSIsImNyZWF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsInVwZGF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsIl9fdiI6MCwiaWF0IjoxNTcwMzc4MTg5fQ.4B8dixKAaYetbO2SgSblq1ASkUGLDng_5u632_m2PWk",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/inventarioUpdate/{{inventarioId}}/{{sellPrice}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"inventarioUpdate",
+						"{{inventarioId}}",
+						"{{sellPrice}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "traspasos",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWN1cnNhbGVzIjpbXSwiX2lkIjoiNWQ4ZDczOTIyYTA4ZTAwMDE3YjdlN2M5IiwibmFtZSI6Ikx1aXMiLCJsYXN0bmFtZSI6ImdlcmVudGUiLCJlbWFpbCI6Imx1aXNnZXJlbnRlQG1haWwuY29tIiwidXNlcm5hbWUiOiJsdWlzZ2VyZW50ZSIsInBhc3N3b3JkIjoiJDJhJDEwJEEybXpqbjBZN3o1L2xZZFI3dFptcE9VdzB5WUNkcWE4Mm9CS3BNL1NiMjVjbXNGM1JmeWw2Iiwicm9sZSI6ImdlcmVudGUiLCJzdWN1cnNhbCI6IjVkOGQ4NWE0ZDc3MjRjMDAxNzdmOTU5OSIsImNyZWF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsInVwZGF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsIl9fdiI6MCwiaWF0IjoxNTcwMzc4MTg5fQ.4B8dixKAaYetbO2SgSblq1ASkUGLDng_5u632_m2PWk",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"from\": \"inventario id\",\n\t\"to\": \"inventario id\",\n\t\"quantity\": 1\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/traspasos",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"traspasos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "crear venta",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/ventas/new/5d957f2e04c99d3d3b8df803/1",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"ventas",
+						"new",
+						"5d957f2e04c99d3d3b8df803",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get de ventas",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"code\": null,\n\t\"name\": \"tacos\",\n\t\"description\": \"tacos de pollo\",\n\t\"materias\": [{\"id\": \"5d9427c6df6249ae4d529116\", \"cantidad\": 1, \"unidad\": \"kg\"}],\n\t\"area\": \"cocina\",\n\t\"type\": \"\",\n\t\"cost\": 50,\n\t\"unidad\": \"Kg\",\n\t\"category\": \"productos hechos en cocina\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/ventas/all",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"ventas",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get menu",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWN1cnNhbGVzIjpbXSwiX2lkIjoiNWQ4ZDczOTIyYTA4ZTAwMDE3YjdlN2M5IiwibmFtZSI6Ikx1aXMiLCJsYXN0bmFtZSI6ImdlcmVudGUiLCJlbWFpbCI6Imx1aXNnZXJlbnRlQG1haWwuY29tIiwidXNlcm5hbWUiOiJsdWlzZ2VyZW50ZSIsInBhc3N3b3JkIjoiJDJhJDEwJEEybXpqbjBZN3o1L2xZZFI3dFptcE9VdzB5WUNkcWE4Mm9CS3BNL1NiMjVjbXNGM1JmeWw2Iiwicm9sZSI6ImdlcmVudGUiLCJzdWN1cnNhbCI6IjVkOGQ4NWE0ZDc3MjRjMDAxNzdmOTU5OSIsImNyZWF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsInVwZGF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsIl9fdiI6MCwiaWF0IjoxNTcwOTk2MzM1fQ.s3qjqrp9m755H0_AilqBPgMUJH7JM3jC7kRSja0HQNE",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/api/inventarios/menu",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"menu"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new category",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWN1cnNhbGVzIjpbXSwiX2lkIjoiNWQ4ZDczOTIyYTA4ZTAwMDE3YjdlN2M5IiwibmFtZSI6Ikx1aXMiLCJsYXN0bmFtZSI6ImdlcmVudGUiLCJlbWFpbCI6Imx1aXNnZXJlbnRlQG1haWwuY29tIiwidXNlcm5hbWUiOiJsdWlzZ2VyZW50ZSIsInBhc3N3b3JkIjoiJDJhJDEwJEEybXpqbjBZN3o1L2xZZFI3dFptcE9VdzB5WUNkcWE4Mm9CS3BNL1NiMjVjbXNGM1JmeWw2Iiwicm9sZSI6ImdlcmVudGUiLCJzdWN1cnNhbCI6IjVkOGQ4NWE0ZDc3MjRjMDAxNzdmOTU5OSIsImNyZWF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsInVwZGF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsIl9fdiI6MCwiaWF0IjoxNTcwOTk2MzM1fQ.s3qjqrp9m755H0_AilqBPgMUJH7JM3jC7kRSja0HQNE",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pollo\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/categories/new",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "crear venta de paquete",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerenteToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"sucursal\": \"sucursal id\",\n\t\"cantidad\": 1,\n\t\"paqueteId\": \"paquete id\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/ventas/paquete",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"ventas",
+						"paquete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get ventas por paquete",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerenteToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"sucursal\": \"sucursal id\",\n\t\"cantidad\": 1,\n\t\"paqueteId\": \"paquete id\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/ventas/porpaquete/{{paqueteId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"ventas",
+						"porpaquete",
+						"{{paqueteId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "registrar merma",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWN1cnNhbGVzIjpbXSwiX2lkIjoiNWQ4ZDczOTIyYTA4ZTAwMDE3YjdlN2M5IiwibmFtZSI6Ikx1aXMiLCJsYXN0bmFtZSI6ImdlcmVudGUiLCJlbWFpbCI6Imx1aXNnZXJlbnRlQG1haWwuY29tIiwidXNlcm5hbWUiOiJsdWlzZ2VyZW50ZSIsInBhc3N3b3JkIjoiJDJhJDEwJEEybXpqbjBZN3o1L2xZZFI3dFptcE9VdzB5WUNkcWE4Mm9CS3BNL1NiMjVjbXNGM1JmeWw2Iiwicm9sZSI6ImdlcmVudGUiLCJzdWN1cnNhbCI6IjVkOGQ4NWE0ZDc3MjRjMDAxNzdmOTU5OSIsImNyZWF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsInVwZGF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsIl9fdiI6MCwiaWF0IjoxNTcwOTk2MzM1fQ.s3qjqrp9m755H0_AilqBPgMUJH7JM3jC7kRSja0HQNE",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"motivo de la merma\",\n\t\"type\": \"tipo materia / producto\",\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/registrarMerma/{{inventarioId}}/1",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"registrarMerma",
+						"{{inventarioId}}",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "registrar devolucion",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWN1cnNhbGVzIjpbXSwiX2lkIjoiNWQ4ZDczOTIyYTA4ZTAwMDE3YjdlN2M5IiwibmFtZSI6Ikx1aXMiLCJsYXN0bmFtZSI6ImdlcmVudGUiLCJlbWFpbCI6Imx1aXNnZXJlbnRlQG1haWwuY29tIiwidXNlcm5hbWUiOiJsdWlzZ2VyZW50ZSIsInBhc3N3b3JkIjoiJDJhJDEwJEEybXpqbjBZN3o1L2xZZFI3dFptcE9VdzB5WUNkcWE4Mm9CS3BNL1NiMjVjbXNGM1JmeWw2Iiwicm9sZSI6ImdlcmVudGUiLCJzdWN1cnNhbCI6IjVkOGQ4NWE0ZDc3MjRjMDAxNzdmOTU5OSIsImNyZWF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsInVwZGF0ZWRBdCI6IjIwMTktMDktMjdUMDI6Mjc6MzAuMzIwWiIsIl9fdiI6MCwiaWF0IjoxNTcwOTk2MzM1fQ.s3qjqrp9m755H0_AilqBPgMUJH7JM3jC7kRSja0HQNE",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"motivo de la merma\",\n\t\"type\": \"tipo materia / producto\",\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/inventarios/devolucion/{{inventarioId}}/1",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"inventarios",
+						"devolucion",
+						"{{inventarioId}}",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "agregar efectivo",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"efectivo\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/caja/add/{{cajaId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"caja",
+						"add",
+						"{{cajaId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "retirar efectivo",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"efectivo\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/caja/subs/{{cajaId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"caja",
+						"subs",
+						"{{cajaId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reporte de caja",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"efectivo\": 10\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/caja/report",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"caja",
+						"report"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"luisgerente\",\n\t\"password\": \"gerente\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/users/updated/{{userId}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"updated",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get zonas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/api/locations/zonas/all",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"locations",
+						"zonas",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get zonas por usuario",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{gerente-token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/api/locations/zonas/user",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"locations",
+						"zonas",
+						"user"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
