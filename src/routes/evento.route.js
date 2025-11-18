@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const eventoController = require('../controllers/evento.controller');
 const permissions = require('../utils/permissions');
-const upload = require('../utils/file-upload');
+//const upload = require('../utils/file-upload');
 
 
 

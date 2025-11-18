@@ -1,6 +1,5 @@
 // evento.controller.js
 const mongoose = require('mongoose');
-const upload = require('../utils/file-upload');
 const Evento = require('../models/evento.model');
 const User = require('../models/user.model');
 const { sendEmails } = require('../controllers/mailer.controller');
