@@ -13,6 +13,7 @@ const validRoles = [
 
 const userSchema = new Schema({
   name: { type: String, required: [true, 'Name is required'] },
+  activo: { type: Number, default: 1 },
   lastname: { type: String, required: [true, 'Lastname is required'] },
   email: { type: String, required: [true, 'Email is required'] },
   username: { type: String, required: [true, 'Username is required'] },
@@ -21,19 +22,19 @@ const userSchema = new Schema({
 }, { timestamps: true });
 
 
-// 🔐 Hash de contraseña
+// Hash de contraseña
 userSchema.methods.hashPassword = async function (password) {
   return await bcrypt.hash(password, 10);
 };
 
 
-// 🔓 Validar contraseña
+// Validar contraseña
 userSchema.methods.isValidPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
 
-// 🔎 Validación de username único
+// Validación de username único
 userSchema.path('username').validate(async function (value) {
   const usernameCount = await mongoose.models.user.countDocuments({ username: value });
   return !usernameCount;

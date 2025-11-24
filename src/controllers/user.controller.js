@@ -38,7 +38,7 @@ userCtrl.login = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "Usuario no existe o inactivo" });
 
-    const validation = await user.isValidPassword(password, user);
+    const validation = await user.isValidPassword(password);
 
     if (!validation)
       return res.status(404).json({ message: "Contraseña incorrecta" });
@@ -50,6 +50,7 @@ userCtrl.login = async (req, res) => {
     res.json(error.message);
   }
 };
+
 
 // Actualizar usuario
 userCtrl.updateUser = async (req, res) => {
@@ -104,25 +105,6 @@ userCtrl.getUser = async (req, res) => {
     res.json(user);
   } catch (error) {
     res.json(error.message);
-  }
-};
-
-// Cambiar password
-userCtrl.changePassword = async (req, res) => {
-  try {
-    const { password } = req.body;
-
-    let pass = await bcrypt.hash(password, 10);
-
-    const user = await User.findOneAndUpdate(
-      { _id: req.params.id },
-      { $set: { password: pass } },
-      { new: true }
-    );
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json(error.message);
   }
 };
 
