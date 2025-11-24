@@ -3,14 +3,12 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const validRoles = [
-  'cocinero',
-  'encargado de sucursal',
+  'analista',
+  'rh',
   'gerente',
-  'auxiliar de zona',
-  'administrativo',
+  'encargado sala',
   'super administrativo',
-  'supervisor',
-  'rh de zona'
+  'legal'
 ];
 
 const userSchema = new Schema({
