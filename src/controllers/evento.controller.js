@@ -22,15 +22,12 @@ eventoCtrl.createEvent = async (req, res) => {
       return res.status(404).json({ mensaje: 'No se encontró al usuario' });
     }
 
-    // Como no hay multer, attached siempre estará vacío
     const attachedFiles = [];
 
     const newEvent = new Evento({
       ...req.body,
       attached: attachedFiles,
       userAdd,
-      userUpd: null,
-      userDel: null,
       activo: 1,
     });
 
@@ -44,37 +41,35 @@ eventoCtrl.createEvent = async (req, res) => {
       );
     }
 
-    await sendEmailToEventCreatorOrEditor(eventSaved, false);
+    await sendEmailToCreator(eventSaved);
 
     res.status(201).json(eventSaved);
   } catch (error) {
-    console.error('Error al crear evento:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
+//Método para enviar correo a invitados
 const sendInvitationsEmails = async (eventSaved, isUpdated = false) => {
   const emailsToSend = eventSaved.emails
     .filter(email => !email.emailSent)
     .map(email => email.email);
 
-  const subject = isUpdated ? 'Actualización de evento' : 'Invitación para Evento';
+  const subject = isUpdated
+    ? 'Actualización de evento'
+    : 'Invitación para Evento';
+
   const googleMapsLink = `https://www.google.com/maps?q=${eventSaved.location.lat},${eventSaved.location.lng}`;
 
   const htmlBody = `
-    <div style="width: 90%; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; text-align: center;">
-      <img src="https://www.pechugon.com.mx/assets/img/cropped-Site-Icon.png" alt="Logo" style="width: 500px; height: auto; margin-bottom: 20px;">  
-      <hr>
-      <h1>${isUpdated ? 'La información del evento fue actualizada' : '¡Estás invitado/a!'}</h1>
-      <p><strong>Evento:</strong> ${eventSaved.name}</p>
+    <div>
+      <h1>${eventSaved.name}</h1>
       <p><strong>Descripción:</strong> ${eventSaved.description}</p>
       <p><strong>Fecha:</strong> ${new Date(eventSaved.date).toLocaleDateString()}</p>
-      <p><strong>Hora:</strong> ${formatTime(eventSaved.time)}</p>
+      <p><strong>Horario:</strong> ${formatTime(eventSaved.startTime)} - ${formatTime(eventSaved.endTime)}</p>
       <p><strong>Lugar:</strong> ${eventSaved.place}</p>
       <p><strong>Dirección:</strong> ${eventSaved.address}</p>
-      <p><a href="${googleMapsLink}" target="_blank">Ver en Google Maps</a></p>
-      <hr>
-      <p>Pollo Pechugón Rosticerías</p>
+      <p><a href="${googleMapsLink}">Ver en mapa</a></p>
     </div>
   `;
 
@@ -82,29 +77,22 @@ const sendInvitationsEmails = async (eventSaved, isUpdated = false) => {
 };
 
 // Email para el creador del evento
-const sendEmailToEventCreatorOrEditor = async (eventSaved, isUpdated = false) => {
-  const user = isUpdated ? eventSaved.userUpd : eventSaved.userAdd;
-
-  const subject = isUpdated ? 'Editaste la información del Evento' : 'Creaste un nuevo evento';
+const sendEmailToCreator = async (eventSaved) => {
+  const subject = 'Creaste un nuevo evento';
 
   const htmlBody = `
-    <div style="width: 90%; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; border-radius: 10px; padding: 20px; text-align: center;">
-      <img src="https://www.pechugon.com.mx/assets/img/cropped-Site-Icon.png" alt="Logo" style="width: 500px; margin-bottom: 20px;">
-      <h1>${isUpdated ? "El evento ha sido actualizado" : "Evento creado exitosamente"}</h1>
+    <div>
+      <h1>Evento creado exitosamente</h1>
       <p><strong>Evento:</strong> ${eventSaved.name}</p>
-      <p><strong>Descripción:</strong> ${eventSaved.description}</p>
       <p><strong>Fecha:</strong> ${new Date(eventSaved.date).toLocaleDateString()}</p>
-      <p><strong>Hora:</strong> ${formatTime(eventSaved.time)}</p>
-      <p><strong>Lugar:</strong> ${eventSaved.place}</p>
-      <p><strong>Dirección:</strong> ${eventSaved.address}</p>
-      <hr>
-      <p>Pollo Pechugón Rosticerías</p>
+      <p><strong>Horario:</strong> ${formatTime(eventSaved.startTime)} - ${formatTime(eventSaved.endTime)}</p>
     </div>
   `;
 
-  await sendEmails([user.email], subject, htmlBody, []);
+  await sendEmails([eventSaved.userAdd.email], subject, htmlBody, []);
 };
 
+//Obtener todos los eventos
 eventoCtrl.getAllEventos = async (req, res) => {
   try {
     const { month, year } = req.query; 
@@ -150,35 +138,24 @@ eventoCtrl.getEventoById = async (req, res) => {
   }
 };
 
+//Método para editar evento
 eventoCtrl.updateEvento = async (req, res) => {
-  const { id } = req.params;
-
-  const userUpd = await User.findById(req.params.userId);
-  if (!userUpd) {
-    return res.status(404).json({ mensaje: 'No se encontró al usuario' });
-  }
-
-  const updatedData = req.body;
-
-  for (let field in updatedData) {
-    if (updatedData[field] === null || updatedData[field] === '') {
-      delete updatedData[field];
-    }
-  }
-
   try {
-    // Como no hay multer, no se agregan archivos nuevos
-    const attachedFiles = [];
+    const event = await Evento.findById(req.params.id);
 
-    const evento = await Evento.findById(id);
-    if (!evento) {
+    if (!event || !event.activo) {
       return res.status(404).json({ mensaje: 'Evento no encontrado' });
     }
 
-    updatedData.userUpd = userUpd;
+    const updatedData = req.body;
+    for (let field in updatedData) {
+      if (updatedData[field] === '' || updatedData[field] === null) {
+        delete updatedData[field];
+      }
+    }
 
     const eventUpdated = await Evento.findByIdAndUpdate(
-      id,
+      req.params.id,
       updatedData,
       { new: true }
     );
@@ -186,46 +163,40 @@ eventoCtrl.updateEvento = async (req, res) => {
     if (eventUpdated.emails && eventUpdated.emails.length > 0) {
       await sendInvitationsEmails(eventUpdated, true);
       await Evento.updateOne(
-        { _id: eventUpdated._id }, 
+        { _id: eventUpdated._id },
         { $set: { "emails.$[].emailSent": true } }
       );
     }
-
-    await sendEmailToEventCreatorOrEditor(eventUpdated, true);
 
     res.status(200).json({
       mensaje: 'Evento actualizado con éxito',
       evento: eventUpdated
     });
+
   } catch (error) {
-    res.status(500).json({ error: 'Ocurrió un error al actualizar el evento: ' + error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
+//Método para eliminar evento
 eventoCtrl.deleteEvento = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const userDel = await User.findById(req.params.userId);
-    if (!userDel) {
-      return res.status(404).json({ mensaje: 'No se encontró al usuario' });
-    }
+    const event = await Evento.findById(req.params.id);
 
-    const event = await Evento.findById(id);
     if (!event || !event.activo) {
       return res.status(404).json({ mensaje: 'Evento no encontrado' });
     }
 
     event.activo = 0;
-    event.userDel = userDel;
     await event.save();
 
     res.status(200).json({
       mensaje: 'Evento eliminado con éxito',
       event
     });
+
   } catch (error) {
-    res.status(500).json({ error: 'Ocurrió un error al eliminar el evento: ' + error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
