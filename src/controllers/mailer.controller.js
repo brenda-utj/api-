@@ -1,33 +1,11 @@
 // mailer.controller.js
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');
 require('dotenv').config();
 
-console.log('🔧 Configuración de correo:');
-console.log('User:', process.env.MAILER_USER);
-console.log('Pass configurado:', process.env.MAILER_PASS ? 'Sí ✅' : 'No ❌');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Configuración del transporter con host y puerto explícitos
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: process.env.MAILER_USER,
-    pass: process.env.MAILER_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false // Para evitar problemas de certificados en algunos servidores
-  }
-});
-
-// Verificar la configuración al iniciar
-transporter.verify(function (error, success) {
-  if (error) {
-    console.error('❌ Error en configuración de Nodemailer:', error);
-  } else {
-    console.log('✅ Servidor SMTP de Gmail listo para enviar mensajes');
-  }
-});
+console.log('🔧 Configuración de Resend:');
+console.log('API Key configurado:', process.env.RESEND_API_KEY ? 'Sí ✅' : 'No ❌');
 
 // Función para enviar correos
 const sendEmails = async (emails, subject, htmlBody, attachments = []) => {
@@ -38,21 +16,21 @@ const sendEmails = async (emails, subject, htmlBody, attachments = []) => {
   }
 
   try {
-    const mailOptions = emails.map((email) => ({
-      from: process.env.MAILER_USER,
-      to: email,
-      subject,
-      html: htmlBody,
-      attachments
-    }));
-
-    console.log('📮 Enviando', mailOptions.length, 'correos...');
+    console.log('📮 Enviando', emails.length, 'correos con Resend...');
     
-    const results = await Promise.all(
-      mailOptions.map((options) => transporter.sendMail(options))
+    const emailPromises = emails.map((email) => 
+      resend.emails.send({
+        from: 'Pechu Events <onboarding@resend.dev>',
+        to: email,
+        subject: subject,
+        html: htmlBody,
+      })
     );
+
+    const results = await Promise.all(emailPromises);
     
     console.log('✅ Correos enviados exitosamente:', results.length);
+    console.log('IDs de correos:', results.map(r => r.data?.id));
     return results;
     
   } catch (error) {
