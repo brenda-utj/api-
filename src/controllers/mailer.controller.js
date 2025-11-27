@@ -18,19 +18,30 @@ const sendEmails = async (emails, subject, htmlBody, attachments = []) => {
   try {
     console.log('📮 Enviando', emails.length, 'correos con Resend...');
     
-    const emailPromises = emails.map((email) => 
-      resend.emails.send({
-        from: 'Pechu Events <onboarding@resend.dev>',
-        to: email,
-        subject: subject,
-        html: htmlBody,
-      })
-    );
-
-    const results = await Promise.all(emailPromises);
+    // Enviar correos uno por uno para ver cuál falla
+    const results = [];
+    for (const email of emails) {
+      try {
+        console.log(`  → Enviando a: ${email}`);
+        const result = await resend.emails.send({
+          from: 'Pechu Events <onboarding@resend.dev>',
+          to: email,
+          subject: subject,
+          html: htmlBody,
+        });
+        
+        if (result.data) {
+          console.log(`  ✅ Enviado a ${email} - ID: ${result.data.id}`);
+          results.push(result);
+        } else if (result.error) {
+          console.error(`  ❌ Error al enviar a ${email}:`, result.error);
+        }
+      } catch (emailError) {
+        console.error(`  ❌ Excepción al enviar a ${email}:`, emailError.message);
+      }
+    }
     
-    console.log('✅ Correos enviados exitosamente:', results.length);
-    console.log('IDs de correos:', results.map(r => r.data?.id));
+    console.log('✅ Proceso completado. Enviados:', results.length, 'de', emails.length);
     return results;
     
   } catch (error) {
