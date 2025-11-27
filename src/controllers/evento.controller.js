@@ -23,7 +23,6 @@ eventoCtrl.createEvent = async (req, res) => {
     }
 
     const attachedFiles = [];
-
     const newEvent = new Evento({
       ...req.body,
       attached: attachedFiles,
@@ -32,18 +31,28 @@ eventoCtrl.createEvent = async (req, res) => {
     });
 
     const eventSaved = await newEvent.save();
-
-    if (req.body.emails && req.body.emails.length > 0) {
-      await sendInvitationsEmails(eventSaved);
-      await Evento.updateOne(
-        { _id: eventSaved._id }, 
-        { $set: { "emails.$[].emailSent": true } }
-      );
-    }
-
-    await sendEmailToCreator(eventSaved);
-
+    
+    // Responder inmediatamente
     res.status(201).json(eventSaved);
+
+    // Enviar correos en segundo plano (sin await)
+    (async () => {
+      try {
+        if (req.body.emails && req.body.emails.length > 0) {
+          await sendInvitationsEmails(eventSaved);
+          await Evento.updateOne(
+            { _id: eventSaved._id }, 
+            { $set: { "emails.$[].emailSent": true } }
+          );
+        }
+
+        await sendEmailToCreator(eventSaved);
+        console.log('Correos enviados exitosamente para evento:', eventSaved._id);
+      } catch (emailError) {
+        console.error('Error al enviar correos para evento:', eventSaved._id, emailError);
+      }
+    })();
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
