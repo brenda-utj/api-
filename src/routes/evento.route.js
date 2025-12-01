@@ -15,10 +15,10 @@ router.get('/all', permissions.isLoggedIn, eventoController.getAllEventos);
 router.get('/:id', permissions.isLoggedIn, eventoController.getEventoById);
 
 // Actualizar un evento
-router.put('/update/:id/:userId', permissions.isLoggedIn, eventoController.updateEvento);
+router.put('/update/:id', permissions.isLoggedIn, eventoController.updateEvento);
 
 //Eliminar un evento (activo 0)
-router.delete('/delete/:id/:userId', permissions.isLoggedIn, eventoController.deleteEvento);
+router.delete('/delete/:id', permissions.isLoggedIn, eventoController.deleteEvento);
 
 
 module.exports = router;

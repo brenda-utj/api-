@@ -51,6 +51,16 @@ userCtrl.login = async (req, res) => {
   }
 };
 
+//Método para cerrar sesión
+userCtrl.logout = (req, res) => {
+  try {
+    // No necesitas lógica del lado del backend si no guardas tokens
+    return res.status(200).json({ message: "Sesión cerrada correctamente" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 // Actualizar usuario
 userCtrl.updateUser = async (req, res) => {

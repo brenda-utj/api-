@@ -83,6 +83,7 @@ eventoCtrl.createEvent = async (req, res) => {
     // CORREOS EN SEGUNDO PLANO
     (async () => {
       try {
+        console.log('Enviando correos...', req.body?.emails.map(({email}) => email + ', '))
         if (req.body.emails && req.body.emails.length > 0) {
           await sendInvitationsEmails(eventSaved);
           await Evento.updateOne(
