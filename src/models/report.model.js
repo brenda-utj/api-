@@ -7,7 +7,7 @@ const AttachmentSchema = new Schema({
   type: { type: String } // ejemplo: "image/png", "application/pdf"
 }, { _id: false });
 
-const NoteSchema = new Schema({
+const ReportSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'user', required: true, index: true },
   eventId: { type: Schema.Types.ObjectId, ref: 'Events', required: true, index: true },
 
@@ -29,4 +29,4 @@ const NoteSchema = new Schema({
   active: { type: Boolean, default: true }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Note', NoteSchema);
+module.exports = mongoose.model('Report', ReportSchema);

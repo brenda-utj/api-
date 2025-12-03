@@ -51,6 +51,7 @@ console.log("📁 Public path:", publicPath);
 app.use("/api/users", require("./routes/user.route"));
 app.use("/api/events", require("./routes/evento.route"));
 app.use("/api/notes", require("./routes/note.route"));
+app.use("/api/reports", require("./routes/report.route"));
 app.use("/api/map", require("./routes/map.route"));
 app.use("/api/modulos", require("./routes/modulos.route"));
 

@@ -1,8 +1,8 @@
-const Note = require('../models/note.model');
+const Report = require('../models/report.model');
 const Evento = require('../models/evento.model');
 const mongoose = require('mongoose');
 
-const notesCtrl = {};
+const reportsCtrl = {};
 
 // Helpers de validación simples
 const validateAttachments = (attachments) => {
@@ -14,7 +14,7 @@ const validateAttachments = (attachments) => {
 };
 
 // Crear nota 
-notesCtrl.createNote = async (req, res) => {
+reportsCtrl.createReport = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
     const { eventId } = req.params;
@@ -40,24 +40,24 @@ notesCtrl.createNote = async (req, res) => {
       return res.status(400).json({ message: 'Adjuntos con formato inválido' });
     }
 
-    const note = new Note({
+    const report = new Report({
       userId,
       eventId,
       content: content.trim(),
       attachments: attachments || []
     });
 
-    const saved = await note.save();
+    const saved = await report.save();
     return res.status(201).json(saved);
 
   } catch (err) {
-    console.error("createNote error:", err);
+    console.error("createReport error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
 // Obtener notas del usuario para un evento (solo las del req.user)
-notesCtrl.getNotesForEvent = async (req, res) => {
+reportsCtrl.getReportsForEvent = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
     const { eventId } = req.params;
@@ -66,69 +66,69 @@ notesCtrl.getNotesForEvent = async (req, res) => {
       return res.status(400).json({ message: 'eventId inválido' });
     }
 
-    const notes = await Note.find({ eventId, userId, active: true }).sort({ createdAt: -1 });
-    return res.json(notes);
+    const reports = await Report.find({ eventId, userId, active: true }).sort({ createdAt: -1 });
+    return res.json(reports);
   } catch (err) {
-    console.error("getNotesForEvent error:", err);
+    console.error("getReportsForEvent error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
 // Obtener todas las notas del usuario en todos los eventos
-notesCtrl.getAllMyNotes = async (req, res) => {
+reportsCtrl.getAllMyReports = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
-    const notes = await Note.find({ active: true }).sort({ createdAt: -1 });
-    return res.json(notes);
+    const reports = await Report.find({ userId, active: true }).sort({ createdAt: -1 });
+    return res.json(reports);
   } catch (err) {
-    console.error("getAllMyNotes error:", err);
+    console.error("getAllMyReports error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
 // Obtener nota por ID (solo dueño)
-notesCtrl.getNoteById = async (req, res) => {
+reportsCtrl.getReportById = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
-    const noteId = req.params.id;
+    const reportId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(noteId)) {
-      return res.status(400).json({ message: 'note id inválido' });
+    if (!mongoose.Types.ObjectId.isValid(reportId)) {
+      return res.status(400).json({ message: 'report id inválido' });
     }
 
-    const note = await Note.findById(noteId);
+    const report = await Report.findById(reportId);
 
-    if (!note || !note.active) {
+    if (!report || !report.active) {
       return res.status(404).json({ message: 'Nota no encontrada' });
     }
 
-    if (note.userId.toString() !== userId.toString()) {
+    if (report.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'No tienes permiso para ver esta nota' });
     }
 
-    return res.status(200).json(note);
+    return res.status(200).json(report);
 
   } catch (err) {
-    console.error("getNoteById error:", err);
+    console.error("getReportById error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
 // Actualizar nota 
-notesCtrl.updateNote = async (req, res) => {
+reportsCtrl.updateReport = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
-    const noteId = req.params.id;
+    const reportId = req.params.id;
     const { content, attachments } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(noteId)) {
-      return res.status(400).json({ message: 'note id inválido' });
+    if (!mongoose.Types.ObjectId.isValid(reportId)) {
+      return res.status(400).json({ message: 'report id inválido' });
     }
 
-    const note = await Note.findById(noteId);
-    if (!note || !note.active) return res.status(404).json({ message: 'Nota no encontrada' });
+    const report = await Report.findById(reportId);
+    if (!report || !report.active) return res.status(404).json({ message: 'Nota no encontrada' });
 
-    if (note.userId.toString() !== userId.toString()) {
+    if (report.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'No tienes permiso para editar esta nota' });
     }
 
@@ -138,47 +138,47 @@ notesCtrl.updateNote = async (req, res) => {
         return res.status(400).json({ message: 'El contenido de la nota es obligatorio' });
       }
       if (content.length > 2000) return res.status(400).json({ message: 'El contenido excede el máximo permitido (2000)' });
-      note.content = content.trim();
+      report.content = content.trim();
     }
 
     if (attachments !== undefined) {
       if (!validateAttachments(attachments)) return res.status(400).json({ message: 'Adjuntos con formato inválido' });
-      note.attachments = attachments;
+      report.attachments = attachments;
     }
 
-    note.updatedAt = new Date();
-    const saved = await note.save();
+    report.updatedAt = new Date();
+    const saved = await report.save();
     return res.json(saved);
 
   } catch (err) {
-    console.error("updateNote error:", err);
+    console.error("updateReport error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
 // Eliminar nota (soft delete) (solo dueño)
-notesCtrl.deleteNote = async (req, res) => {
+reportsCtrl.deleteReport = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
-    const noteId = req.params.id;
+    const reportId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(noteId)) return res.status(400).json({ message: 'note id inválido' });
+    if (!mongoose.Types.ObjectId.isValid(reportId)) return res.status(400).json({ message: 'report id inválido' });
 
-    const note = await Note.findById(noteId);
-    if (!note || !note.active) return res.status(404).json({ message: 'Nota no encontrada' });
+    const report = await Report.findById(reportId);
+    if (!report || !report.active) return res.status(404).json({ message: 'Nota no encontrada' });
 
-    if (note.userId.toString() !== userId.toString()) {
+    if (report.userId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'No tienes permiso para eliminar esta nota' });
     }
 
-    note.active = false;
-    await note.save();
+    report.active = false;
+    await report.save();
 
     return res.json({ message: 'Nota eliminada correctamente' });
   } catch (err) {
-    console.error("deleteNote error:", err);
+    console.error("deleteReport error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
 
-module.exports = notesCtrl;
+module.exports = reportsCtrl;

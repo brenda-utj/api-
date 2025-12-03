@@ -190,7 +190,7 @@ userCtrl.getUserByUsername = async (req, res) => {
         .json({ error: 'El campo "username" es requerido.' });
     }
 
-    const foundUser = await userModel.findOne({ username: username });
+    const foundUser = await User.findOne({ username: username });
 
     if (foundUser) {
       return res.json(foundUser._id);
@@ -200,7 +200,7 @@ userCtrl.getUserByUsername = async (req, res) => {
         .json({ error: "No se encontraron datos del usuario." });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Ocurrió un error en el servidor." });
+    return res.status(500).json({ error: "Ocurrió un error en el servidor." + error });
   }
 };
 
