@@ -61,7 +61,6 @@ userCtrl.logout = (req, res) => {
   }
 };
 
-
 // Actualizar usuario
 userCtrl.updateUser = async (req, res) => {
   try {
@@ -117,5 +116,249 @@ userCtrl.getUser = async (req, res) => {
     res.json(error.message);
   }
 };
+
+
+
+
+
+
+
+//Método para encontrar una sesión del admin
+  userCtrl.findNumberIdentities = async (req, res) => {
+    try {
+      const { identity } = req.params;
+
+      const identities = await IdentityAdmin.countDocuments({ _id: identity });
+      const identitiesData = await IdentityAdmin.find({ _id: identity });
+
+      let now = new Date();
+      let sessionExpired = false;
+
+      for (let identity of identitiesData) {
+        let createdAt = new Date(identity.createdAt);
+        let timeDifference = now - createdAt;
+        let hoursDifference = timeDifference / (1000 * 60 * 60);
+
+        if (hoursDifference >= 12) {
+          sessionExpired = true;
+          break; // Si se encuentra una identidad con más de 24 horas, no es necesario seguir buscando
+        }
+      }
+
+      let response = {
+        identities,
+        sessionExpired,
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error("Error en findNumberIdentities:", error);
+      res.status(500).json({ error: "Error en el servidor" });
+    }
+  };
+
+  userCtrl.getUserDataByUsername = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: 'El campo "id" es requerido.' });
+    }
+
+    const foundUser = await userModel.findOne({ _id: id });
+
+    if (foundUser) {
+      return res.json(foundUser);
+    } else {
+      return res
+        .status(404)
+        .json({ error: "No se encontraron datos del usuario." });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Ocurrió un error en el servidor." });
+  }
+};
+
+userCtrl.getUserByUsername = async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    if (!username) {
+      return res
+        .status(400)
+        .json({ error: 'El campo "username" es requerido.' });
+    }
+
+    const foundUser = await userModel.findOne({ username: username });
+
+    if (foundUser) {
+      return res.json(foundUser._id);
+    } else {
+      return res
+        .status(404)
+        .json({ error: "No se encontraron datos del usuario." });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Ocurrió un error en el servidor." });
+  }
+};
+
+userCtrl.validateIdentityAdm = async (req, res) => {
+  try {
+    const { user } = req.params;
+    const numIdentities = await IdentityAdmin.countDocuments({ user: user });
+    if (numIdentities >= 2) {
+      res.json({ success: false });
+    } else {
+      res.json({ success: true });
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+userCtrl.setIdentityAdm = async (req, res) => {
+  try {
+    const { user, zona } = req.body;
+    const newIdentity = await IdentityAdmin.create({ user: user, zona: zona });
+    res.json({ identity: newIdentity });
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+userCtrl.closeIdentityAdm = async (req, res) => {
+  try {
+    const { identity } = req.params;
+
+    try {
+      const deletedIdentity = await IdentityAdmin.deleteOne({ _id: identity });
+
+      if (deletedIdentity.deletedCount === 0) {
+        // No se encontró ningún registro que coincida con la consulta
+        res.json("No se encontró ningún registro para cerrar la sesión");
+      } else {
+        // Se eliminó al menos un registro
+        res.json("Se ha abierto un espacio para la sesión");
+      }
+    } catch (error) {
+      console.error("Error converting to ObjectId:", error);
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+userCtrl.deleteIdentityAdm = async (req, res) => {
+  try {
+    const { user } = req.params;
+    const deletedIdenties = await IdentityAdmin.deleteMany({ user: user });
+    if (deletedIdenties.deletedCount === 0) {
+      // No se encontró ningún registro que coincida con la consulta
+      res.json("No se encontró ningún usuario para eliminar sesión");
+    } else {
+      // Se eliminó un registro
+      res.json("se han eliminado las sesiones");
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+userCtrl.deleteOneIdentityAdm = async (req, res) => {
+  try {
+    const { identity } = req.params;
+    const deletedIdenties = await IdentityAdmin.deleteOne({ _id: identity });
+    if (deletedIdenties.deletedCount === 0) {
+      // No se encontró ningún registro que coincida con la consulta
+      res.json("No se encontró ninguna sesión para eliminar");
+    } else {
+      // Se eliminó un registro
+      res.json("se ha eliminado la sesiones");
+    }
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+userCtrl.getIdentitiesAdm = async (req, res) => {
+  try {
+    const { user } = req.params;
+
+    const objectId = new mongoose.Types.ObjectId(user);
+    let usuario = await User.findOne({ _id: user });
+
+    let zonas = [];
+    if (usuario.role == "super administrativo") {
+      let aux = await Zona.find({});
+      for (let i = 0; i < aux.length; i++) {
+        zonas.push(Types.ObjectId(aux[i]._id));
+      }
+    } else {
+      for (let i = 0; i < usuario.zonas.length; i++) {
+        zonas.push(Types.ObjectId(usuario.zonas[i]));
+      }
+    }
+
+    const identities = await IdentityAdmin.find({
+      zona: { $in: zonas },
+    }).lean();
+
+    const selectedData = await Promise.all(
+      identities.map(async (identity) => {
+        const userObj = await User.findOne({ _id: identity.user }).lean();
+        const zonaObj = await Zona.findOne({ _id: identity.zona }).lean();
+
+        return {
+          _id: identity._id,
+          user: identity.user,
+          zona: identity.zona,
+          fecha: identity.createdAt,
+          username: userObj.username,
+          zonaname: zonaObj.name,
+        };
+      })
+    );
+
+    res.json(selectedData);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
+userCtrl.findNumberIdentities = async (req, res) => {
+  try {
+    const { identity } = req.params;
+
+    const identities = await IdentityAdmin.countDocuments({ _id: identity });
+    const identitiesData = await IdentityAdmin.find({ _id: identity });
+
+    let now = new Date();
+    let sessionExpired = false;
+
+    for (let identity of identitiesData) {
+      let createdAt = new Date(identity.createdAt);
+      let timeDifference = now - createdAt;
+      let hoursDifference = timeDifference / (1000 * 60 * 60);
+
+      if (hoursDifference >= 12) {
+        sessionExpired = true;
+        break; // Si se encuentra una identidad con más de 24 horas, no es necesario seguir buscando
+      }
+    }
+
+    let response = {
+      identities,
+      sessionExpired,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Error en findNumberIdentities:", error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+};
+
+
 
 module.exports = userCtrl;

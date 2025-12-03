@@ -114,7 +114,7 @@ notesCtrl.getNoteById = async (req, res) => {
   }
 };
 
-// Actualizar nota (solo dueño)
+// Actualizar nota 
 notesCtrl.updateNote = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
