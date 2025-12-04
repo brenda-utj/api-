@@ -18,12 +18,13 @@ reportsCtrl.createReport = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
     const { eventId } = req.params;
-    const { content, attachments } = req.body;
+    const { content } = req.body;
 
-    // validaciones básicas
+    // Validaciones básicas
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       return res.status(400).json({ message: 'eventId inválido' });
     }
+    
     const event = await Evento.findById(eventId);
     if (!event || !event.activo) {
       return res.status(404).json({ message: 'Evento no encontrado' });
@@ -32,19 +33,33 @@ reportsCtrl.createReport = async (req, res) => {
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return res.status(400).json({ message: 'El contenido de la nota es obligatorio' });
     }
+    
     if (content.length > 2000) {
       return res.status(400).json({ message: 'El contenido excede el máximo permitido (2000)' });
     }
 
-    if (attachments && !validateAttachments(attachments)) {
-      return res.status(400).json({ message: 'Adjuntos con formato inválido' });
+    // PROCESAR ARCHIVOS ADJUNTOS
+    const attachments = [];
+    
+    if (req.files && req.files.length > 0) {
+      console.log(`Se subieron ${req.files.length} archivos al reporte`);
+      
+      req.files.forEach(file => {
+        attachments.push({
+          filename: file.originalname,
+          url: `/uploads/${file.filename}`,
+          type: file.mimetype
+        });
+      });
+      
+      console.log('Archivos adjuntos procesados:', attachments);
     }
 
     const report = new Report({
       userId,
       eventId,
       content: content.trim(),
-      attachments: attachments || []
+      attachments: attachments
     });
 
     const saved = await report.save();
@@ -77,14 +92,32 @@ reportsCtrl.getReportsForEvent = async (req, res) => {
 // Obtener todas las notas del usuario en todos los eventos
 reportsCtrl.getAllMyReports = async (req, res) => {
   try {
-    const userId = req.user && req.user._id;
-    const reports = await Report.find({ userId, active: true }).sort({ createdAt: -1 });
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
+    const filter = { active: true };
+
+    // Si NO es super administrativo → solo ver los suyos
+    if (user.role !== "super administrativo") {
+      filter["userId"] = user._id; 
+      // Igual que en notes: tu schema guarda userId como objeto completo
+    }
+
+    const reports = await Report.find(filter)
+      .sort({ createdAt: -1 })
+      .populate("eventId");
+
     return res.json(reports);
+
   } catch (err) {
     console.error("getAllMyReports error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
+
 
 // Obtener nota por ID (solo dueño)
 reportsCtrl.getReportById = async (req, res) => {

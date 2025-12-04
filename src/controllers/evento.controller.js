@@ -14,10 +14,13 @@ function formatTime(timeString) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
+
+// Crear un nuevo evento
+const path = require('path');
+
 // Crear un nuevo evento
 eventoCtrl.createEvent = async (req, res) => {
   try {
-
     const userAdd = await User.findById(req.params.userId);
     if (!userAdd) {
       return res.status(404).json({ mensaje: 'No se encontró al usuario' });
@@ -25,12 +28,20 @@ eventoCtrl.createEvent = async (req, res) => {
 
     // VALIDAR HORARIOS
     const parseTime = (time) => {
-      const [h, m] = time.split(":").map(Number);
+      const [hourMin, modifier] = time.split(" ");
+      let [h, m] = hourMin.split(":").map(Number);
+
+      if (modifier === "PM" && h !== 12) h += 12;
+      if (modifier === "AM" && h === 12) h = 0;
+
       return h * 60 + m;
     };
 
     const start = parseTime(req.body.startTime);
     const end = parseTime(req.body.endTime);
+
+    console.log('startTime', req.body.startTime, start);
+    console.log('endTime', req.body.endTime, end);
 
     if (isNaN(start) || isNaN(end)) {
       return res.status(400).json({ mensaje: "Formato de hora inválido" });
@@ -44,7 +55,6 @@ eventoCtrl.createEvent = async (req, res) => {
 
     // VALIDAR TRASLAPE
     const date = new Date(req.body.date);
-
     const dayStart = new Date(date.setHours(0, 0, 0, 0));
     const dayEnd = new Date(date.setHours(23, 59, 59, 999));
 
@@ -66,8 +76,39 @@ eventoCtrl.createEvent = async (req, res) => {
       });
     }
 
-    // GUARDAR EVENTO
+    const convertTo24h = (time) => {
+      const [hourMin, modifier] = time.split(" ");
+      let [h, m] = hourMin.split(":").map(Number);
+
+      if (modifier === "PM" && h !== 12) h += 12;
+      if (modifier === "AM" && h === 12) h = 0;
+
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    req.body.startTime = convertTo24h(req.body.startTime);
+    req.body.endTime = convertTo24h(req.body.endTime);
+
+    // PROCESAR ARCHIVOS ADJUNTOS
     const attachedFiles = [];
+    
+    if (req.files && req.files.length > 0) {
+      console.log(`Se subieron ${req.files.length} archivos`);
+      
+      req.files.forEach(file => {
+        // Crear la URL relativa para acceder al archivo
+        const fileUrl = `/uploads/${file.filename}`;
+        
+        attachedFiles.push({
+          fileName: file.originalname, // Nombre original del archivo
+          url: fileUrl // URL para acceder al archivo
+        });
+      });
+      
+      console.log('Archivos procesados:', attachedFiles);
+    }
+
+    // GUARDAR EVENTO
     const newEvent = new Evento({
       ...req.body,
       attached: attachedFiles,
@@ -83,7 +124,7 @@ eventoCtrl.createEvent = async (req, res) => {
     // CORREOS EN SEGUNDO PLANO
     (async () => {
       try {
-        console.log('Enviando correos...', req.body?.emails.map(({email}) => email + ', '))
+        console.log('Enviando correos...', req.body?.emails.map(({email}) => email + ', '));
         if (req.body.emails && req.body.emails.length > 0) {
           await sendInvitationsEmails(eventSaved);
           await Evento.updateOne(
@@ -98,6 +139,52 @@ eventoCtrl.createEvent = async (req, res) => {
     })();
 
   } catch (error) {
+    console.error('Error en createEvent:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Actualizar un evento
+eventoCtrl.updateEvento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Buscar el evento existente
+    const existingEvent = await Evento.findById(id);
+    if (!existingEvent) {
+      return res.status(404).json({ mensaje: 'Evento no encontrado' });
+    }
+
+    // Mantener archivos existentes
+    let attachedFiles = existingEvent.attached || [];
+
+    // Si hay nuevos archivos, agregarlos
+    if (req.files && req.files.length > 0) {
+      console.log(`Se subieron ${req.files.length} archivos nuevos`);
+      
+      const newFiles = req.files.map(file => ({
+        fileName: file.originalname,
+        url: `/uploads/${file.filename}`
+      }));
+
+      attachedFiles = [...attachedFiles, ...newFiles];
+      console.log('Archivos actualizados:', attachedFiles);
+    }
+
+    // Actualizar el evento
+    const updatedEvent = await Evento.findByIdAndUpdate(
+      id,
+      {
+        ...req.body,
+        attached: attachedFiles
+      },
+      { new: true }
+    );
+
+    res.status(200).json(updatedEvent);
+
+  } catch (error) {
+    console.error('Error en updateEvento:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -145,12 +232,17 @@ const sendEmailToCreator = async (eventSaved) => {
   await sendEmails([eventSaved.userAdd.email], subject, htmlBody, []);
 };
 
-//Obtener todos los eventos
+// Obtener todos los eventos
 eventoCtrl.getAllEventos = async (req, res) => {
   try {
-    const { month, year } = req.query; 
+    const { month, year, view } = req.query;
+
+    // Vista actual: list | calendar → por defecto "list"
+    const currentView = view === "calendar" ? "calendar" : "list";
+
     const filter = { activo: 1 };
 
+    // Filtro por mes/año
     if (month) {
       const selectedYear = year ? parseInt(year) : new Date().getFullYear();
       const selectedMonth = parseInt(month);
@@ -159,18 +251,44 @@ eventoCtrl.getAllEventos = async (req, res) => {
         return res.status(400).json({ error: "Parámetros de mes o año no válidos" });
       }
 
-      const startMonth = new Date(selectedYear, selectedMonth - 1, 1); 
+      const startMonth = new Date(selectedYear, selectedMonth - 1, 1);
       const endMonth = new Date(selectedYear, selectedMonth, 0, 23, 59, 59);
 
       filter.date = { $gte: startMonth, $lte: endMonth };
     }
 
-    const events = await Evento.find(filter);
+    // Si la vista es CALENDAR: retorna todo sin filtrar por usuario
+    if (currentView === "calendar") {
+      const events = await Evento.find(filter);
+      return res.status(200).json(events);
+    }
+
+    // Si la vista es LIST aplica la lógica por rol
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuario no autenticado" });
+    }
+
+    // Rol super administrativo → ve todo
+    if (user.role === "super administrativo") {
+      const events = await Evento.find(filter);
+      return res.status(200).json(events);
+    }
+
+    // Caso contrario: solo los eventos creados por el usuario
+    const events = await Evento.find({
+      ...filter,
+      "userAdd._id": user._id,
+    });
+
     res.status(200).json(events);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 eventoCtrl.getEventoById = async (req, res) => {
   const { id } = req.params;
@@ -193,79 +311,104 @@ eventoCtrl.getEventoById = async (req, res) => {
 
   //Método para editar evento
   eventoCtrl.updateEvento = async (req, res) => {
-    try {
-      const eventId = req.params.id;
-      const event = await Evento.findById(eventId);
+  try {
+    const eventId = req.params.id;
+    const event = await Evento.findById(eventId);
 
-      if (!event || !event.activo) {
-        return res.status(404).json({ mensaje: 'Evento no encontrado' });
-      }
-
-      // Limpia campos vacíos
-      const updatedData = req.body;
-      for (let field in updatedData) {
-        if (updatedData[field] === '' || updatedData[field] === null) {
-          delete updatedData[field];
-        }
-      }
-
-      const newDate = updatedData.date || event.date;
-      const newStartTime = updatedData.startTime || event.startTime;
-      const newEndTime = updatedData.endTime || event.endTime;
-      const start = new Date(`${newDate}T${newStartTime}`);
-      const end = new Date(`${newDate}T${newEndTime}`);
-
-      if (start >= end) {
-        return res.status(400).json({
-          mensaje: "La hora de inicio debe ser menor que la hora de fin"
-        });
-      }
-
-      // Buscar eventos en el mismo día que se empalmen, excluyendo el actual
-      const overlappingEvent = await Evento.findOne({
-        _id: { $ne: eventId },       // excluye este mismo evento
-        activo: 1,
-        date: newDate,
-        $or: [
-          {
-            startTime: { $lt: newEndTime },
-            endTime: { $gt: newStartTime }
-          }
-        ]
-      });
-
-      if (overlappingEvent) {
-        return res.status(400).json({
-          mensaje: "Ya hay un evento registrado en ese horario"
-        });
-      }
-    
-      // Actualizar evento
-      const eventUpdated = await Evento.findByIdAndUpdate(
-        eventId,
-        updatedData,
-        { new: true }
-      );
-
-      /** Enviar emails si hay invitados */
-      if (eventUpdated.emails && eventUpdated.emails.length > 0) {
-        await sendInvitationsEmails(eventUpdated, true);
-        await Evento.updateOne(
-          { _id: eventUpdated._id },
-          { $set: { "emails.$[].emailSent": true } }
-        );
-      }
-
-      res.status(200).json({
-        mensaje: 'Evento actualizado con éxito',
-        evento: eventUpdated
-      });
-
-    } catch (error) {
-      console.error("Error en updateEvento:", error);
-      res.status(500).json({ error: error.message });
+    if (!event || !event.activo) {
+      return res.status(404).json({ mensaje: 'Evento no encontrado' });
     }
-  };
+
+    // ==== Convertir AM/PM a 24h ====
+    const convertTo24h = (time) => {
+      if (!time) return time; // si no viene, respeta el valor actual
+      const [hourMin, modifier] = time.split(" ");
+      let [h, m] = hourMin.split(":").map(Number);
+
+      if (modifier === "PM" && h !== 12) h += 12;
+      if (modifier === "AM" && h === 12) h = 0;
+
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    // ==== Limpiar campos vacíos ====
+    const updatedData = req.body;
+    for (let field in updatedData) {
+      if (updatedData[field] === '' || updatedData[field] === null) {
+        delete updatedData[field];
+      }
+    }
+
+    // ==== Aplicar conversión solo si vienen en el body ====
+    if (updatedData.startTime) {
+      updatedData.startTime = convertTo24h(updatedData.startTime);
+    }
+
+    if (updatedData.endTime) {
+      updatedData.endTime = convertTo24h(updatedData.endTime);
+    }
+
+    // ==== Tomar valores finales (body o actuales) ====
+    const newDate = updatedData.date || event.date;
+    const newStartTime = updatedData.startTime || event.startTime;
+    const newEndTime = updatedData.endTime || event.endTime;
+
+    // ==== Validación de horario ====
+    const start = new Date(`${newDate}T${newStartTime}`);
+    const end = new Date(`${newDate}T${newEndTime}`);
+
+    if (start >= end) {
+      return res.status(400).json({
+        mensaje: "La hora de inicio debe ser menor que la hora de fin"
+      });
+    }
+
+    // ==== Validar traslape (excluye el evento actual) ====
+    const overlappingEvent = await Evento.findOne({
+      _id: { $ne: eventId },
+      activo: 1,
+      date: newDate,
+      $or: [
+        {
+          startTime: { $lt: newEndTime },
+          endTime: { $gt: newStartTime }
+        }
+      ]
+    });
+
+    if (overlappingEvent) {
+      return res.status(400).json({
+        mensaje: "Ya hay un evento registrado en ese horario"
+      });
+    }
+
+    // ==== Guardar ====
+    const eventUpdated = await Evento.findByIdAndUpdate(
+      eventId,
+      updatedData,
+      { new: true }
+    );
+
+    // ==== Reenvío de correos ====
+    if (eventUpdated.emails && eventUpdated.emails.length > 0) {
+      await sendInvitationsEmails(eventUpdated, true);
+      await Evento.updateOne(
+        { _id: eventUpdated._id },
+        { $set: { "emails.$[].emailSent": true } }
+      );
+    }
+
+    res.status(200).json({
+      mensaje: 'Evento actualizado con éxito',
+      evento: eventUpdated
+    });
+
+  } catch (error) {
+    console.error("Error en updateEvento:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 
 //Método para eliminar evento

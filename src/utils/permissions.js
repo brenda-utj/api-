@@ -40,7 +40,7 @@ module.exports = {
   isLoggedIn: async (req, res, next) => {
     try {
       // Buscar el header con mayúsculas y minúsculas
-      const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+      const authHeader = req.headers['authorization'] || req.headers['Authorization'] ||  req.headers['token'] || req.headers['Token'];
 
       if (!authHeader) {
         return res.status(403).json({ message: "No token provided" });

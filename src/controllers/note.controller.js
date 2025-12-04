@@ -18,12 +18,17 @@ notesCtrl.createNote = async (req, res) => {
   try {
     const userId = req.user && req.user._id;
     const { eventId } = req.params;
-    const { content, attachments } = req.body;
+    const { content } = req.body;
 
-    // validaciones básicas
+    // DEBUG: Ver qué archivos llegan
+    console.log('req.files:', req.files);
+    console.log('req.file:', req.file);
+
+    // Validaciones básicas
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       return res.status(400).json({ message: 'eventId inválido' });
     }
+    
     const event = await Evento.findById(eventId);
     if (!event || !event.activo) {
       return res.status(404).json({ message: 'Evento no encontrado' });
@@ -32,19 +37,35 @@ notesCtrl.createNote = async (req, res) => {
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return res.status(400).json({ message: 'El contenido de la nota es obligatorio' });
     }
+    
     if (content.length > 2000) {
       return res.status(400).json({ message: 'El contenido excede el máximo permitido (2000)' });
     }
 
-    if (attachments && !validateAttachments(attachments)) {
-      return res.status(400).json({ message: 'Adjuntos con formato inválido' });
+    // Procesar archivos subidos
+    const attachments = [];
+    
+    // Verificar si es array o single file
+    const files = req.files || (req.file ? [req.file] : []);
+    
+    if (files.length > 0) {
+      for (const file of files) {
+        console.log('Procesando archivo:', file); // Debug
+        
+        attachments.push({
+          filename: file.originalname,
+          url: `/uploads/${file.originalname}`, // file.filename viene de multer
+          mimetype: file.mimetype,
+          size: file.size
+        });
+      }
     }
 
     const note = new Note({
       userId,
       eventId,
       content: content.trim(),
-      attachments: attachments || []
+      attachments
     });
 
     const saved = await note.save();
@@ -52,6 +73,20 @@ notesCtrl.createNote = async (req, res) => {
 
   } catch (err) {
     console.error("createNote error:", err);
+    
+    // Limpiar archivos si hay error
+    const files = req.files || (req.file ? [req.file] : []);
+    if (files.length > 0) {
+      const fs = require('fs');
+      files.forEach(file => {
+        if (file.path) {
+          fs.unlink(file.path, (unlinkErr) => {
+            if (unlinkErr) console.error('Error eliminando archivo:', unlinkErr);
+          });
+        }
+      });
+    }
+    
     return res.status(500).json({ message: err.message });
   }
 };
@@ -74,17 +109,35 @@ notesCtrl.getNotesForEvent = async (req, res) => {
   }
 };
 
-// Obtener todas las notas del usuario en todos los eventos
+// Obtener todas las notas (con reglas según el rol)
 notesCtrl.getAllMyNotes = async (req, res) => {
   try {
-    const userId = req.user && req.user._id;
-    const notes = await Note.find({ active: true }).sort({ createdAt: -1 });
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+
+    const filter = { active: true };
+
+    // Si NO es super administrativo → filtrar por userId
+    if (user.role !== "super administrativo") {
+      filter["userId"] = user._id; 
+      // Esto se usa porque tu esquema guarda userId como objeto, no como ObjectId
+    }
+
+    const notes = await Note.find(filter)
+      .sort({ createdAt: -1 })
+      .populate("eventId");
+
     return res.json(notes);
+
   } catch (err) {
     console.error("getAllMyNotes error:", err);
     return res.status(500).json({ message: err.message });
   }
 };
+
 
 // Obtener nota por ID (solo dueño)
 notesCtrl.getNoteById = async (req, res) => {

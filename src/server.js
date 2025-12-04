@@ -35,6 +35,9 @@ app.use(bodyParser.json({ limit: "25mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Servir archivos estáticos de la carpeta uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // =========================
 //     ARCHIVOS ESTÁTICOS
 // =========================
