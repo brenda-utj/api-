@@ -202,14 +202,32 @@ const sendInvitationsEmails = async (eventSaved, isUpdated = false) => {
   const googleMapsLink = `https://www.google.com/maps?q=${eventSaved.location.lat},${eventSaved.location.lng}`;
 
   const htmlBody = `
-    <div>
-      <h1>${eventSaved.name}</h1>
-      <p><strong>Descripción:</strong> ${eventSaved.description}</p>
-      <p><strong>Fecha:</strong> ${new Date(eventSaved.date).toLocaleDateString()}</p>
-      <p><strong>Horario:</strong> ${formatTime(eventSaved.startTime)} - ${formatTime(eventSaved.endTime)}</p>
-      <p><strong>Lugar:</strong> ${eventSaved.place}</p>
-      <p><strong>Dirección:</strong> ${eventSaved.address}</p>
-      <p><a href="${googleMapsLink}">Ver en mapa</a></p>
+    <div style="width: 90%; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; text-align: center;">
+      <img src="https://www.pechugon.com.mx/assets/img/cropped-Site-Icon.png" alt="Logo" style="width: 500px; height: auto; margin-bottom: 20px;">  
+      <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+      <h1>${isUpdated ? 'La información del evento fue actualizada' : '¡Estás invitado/a!'}</h1>
+      
+      <p style="font-size: 18px;"><strong>Evento:</strong> ${eventSaved.name}</p>
+      <p style="font-size: 18px;"><strong>Descripción:</strong> ${eventSaved.description}</p>
+      <p style="font-size: 18px;"><strong>Fecha:</strong> ${new Date(eventSaved.date).toLocaleDateString()}</p>
+      <p style="font-size: 18px;"><strong>Hora de inicio:</strong> ${formatTime(eventSaved.startTime)}</p>
+      <p style="font-size: 18px;"><strong>Hora de fin:</strong> ${formatTime(eventSaved.endTime)}</p>
+      <p style="font-size: 18px;"><strong>Lugar:</strong> ${eventSaved.place}</p>
+      <p style="font-size: 18px;"><strong>Dirección:</strong> ${eventSaved.address}</p>
+      <p style="font-size: 18px;">
+      <a href="${googleMapsLink}" target="_blank" 
+         style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #ff5733; text-decoration: none; border-radius: 5px;">
+         Ver en Google Maps
+      </a>
+    </p>
+      <p style="font-size: 18px;">¡Te esperamos!</p>
+
+      <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+
+      <div style="font-size: 12px; color: #555;">
+        <p>Pollo Pechugón Rosticerías Corp, C. Eca Do Queiros 5125, Jardines Universidad, 45110 Zapopan, Jalisco</p>
+        <p>&copy; 2024 Pollo Pechugón Rosticerías. All rights reserved.</p>
+      </div>
     </div>
   `;
 
@@ -221,11 +239,31 @@ const sendEmailToCreator = async (eventSaved) => {
   const subject = 'Creaste un nuevo evento';
 
   const htmlBody = `
-    <div>
-      <h1>Evento creado exitosamente</h1>
-      <p><strong>Evento:</strong> ${eventSaved.name}</p>
-      <p><strong>Fecha:</strong> ${new Date(eventSaved.date).toLocaleDateString()}</p>
-      <p><strong>Horario:</strong> ${formatTime(eventSaved.startTime)} - ${formatTime(eventSaved.endTime)}</p>
+    <div style="width: 90%; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; text-align: center;">
+      <img src="https://www.pechugon.com.mx/assets/img/cropped-Site-Icon.png" alt="Logo" style="width: 500px; height: auto; margin-bottom: 20px;">  
+      <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+      <h1>${isUpdated ? 'La información del evento fue actualizada' : '¡Estás invitado/a!'}</h1>
+      
+      <p style="font-size: 18px;"><strong>Evento:</strong> ${eventSaved.name}</p>
+      <p style="font-size: 18px;"><strong>Descripción:</strong> ${eventSaved.description}</p>
+      <p style="font-size: 18px;"><strong>Fecha:</strong> ${new Date(eventSaved.date).toLocaleDateString()}</p>
+      <p style="font-size: 18px;"><strong>Hora de inicio:</strong> ${formatTime(eventSaved.startTime)}</p>
+      <p style="font-size: 18px;"><strong>Hora de fin:</strong> ${formatTime(eventSaved.endTime)}</p>      <p style="font-size: 18px;"><strong>Lugar:</strong> ${eventSaved.place}</p>
+      <p style="font-size: 18px;"><strong>Dirección:</strong> ${eventSaved.address}</p>
+      <p style="font-size: 18px;">
+      <a href="${googleMapsLink}" target="_blank" 
+         style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #ff5733; text-decoration: none; border-radius: 5px;">
+         Ver en Google Maps
+      </a>
+    </p>
+      <p style="font-size: 18px;">¡Te esperamos!</p>
+
+      <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+
+      <div style="font-size: 12px; color: #555;">
+        <p>Pollo Pechugón Rosticerías Corp, C. Eca Do Queiros 5125, Jardines Universidad, 45110 Zapopan, Jalisco</p>
+        <p>&copy; 2024 Pollo Pechugón Rosticerías. All rights reserved.</p>
+      </div>
     </div>
   `;
 
